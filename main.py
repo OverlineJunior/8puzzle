@@ -1,5 +1,6 @@
 from collections import deque
 import copy
+from functools import lru_cache
 from typing import Optional
 from graph import Node
 
@@ -8,22 +9,12 @@ type Puzzle = list[list[int]]
 # Represents an empty tile.
 _ = 0
 
-SOLVED_STATES = [
-	[
-		[1, 2, 3],
-		[8, _, 4],
-		[7, 6, 5],
-	],
-	[
-		[1, 2, 3],
-		[4, 5, 6],
-		[7, 8, _],
-	],
-	# ...
+# TODO! Don't forget to use other goal states to test against infinite loops.
+GOAL_STATE = [
+	[1, 2, 3],
+	[8, _, 4],
+	[7, 6, 5],
 ]
-
-def is_solved(puzzle: Puzzle) -> bool:
-	return puzzle in SOLVED_STATES
 
 def get_possible_moves(puzzle: Puzzle) -> list[Puzzle]:
 	empty_row, empty_col = [(r, c) for r in range(3) for c in range(3) if puzzle[r][c] == 0][0]
@@ -33,7 +24,7 @@ def get_possible_moves(puzzle: Puzzle) -> list[Puzzle]:
 		new_row, new_col = empty_row + [0, 0, -1, 1][i], empty_col + [-1, 1, 0, 0][i]
 
 		if -1 < new_row < 3 and -1 < new_col < 3:
-			move = copy.deepcopy(puzzle)
+			move = [list(row) for row in puzzle] # Cloning 1 level deep.
 			move[empty_row][empty_col], move[new_row][new_col] = move[new_row][new_col], move[empty_row][empty_col]
 			moves.append(move)
 
@@ -45,7 +36,7 @@ def solve_with_dfs(initial: Puzzle, max_depth: int) -> Optional[Node[Puzzle]]:
 	while len(expanded) > 0:
 		node = expanded.pop()
 
-		if is_solved(node.value):
+		if node.value == GOAL_STATE:
 			return node
 
 		if node.depth() < max_depth:
@@ -56,17 +47,26 @@ def solve_with_dfs(initial: Puzzle, max_depth: int) -> Optional[Node[Puzzle]]:
 
 def solve_with_bfs(initial: Puzzle) -> Optional[Node[Puzzle]]:
 	expanded = deque([Node(initial)])
+	visited = set()
+	# Sets can only contain hashables for fast lookups.
+	visited.add(tuple(map(tuple, initial)))
 
 	while len(expanded) > 0:
 		node = expanded.popleft()
 
-		if is_solved(node.value):
+		if node.value == GOAL_STATE:
 			return node
 
 		for move in get_possible_moves(node.value):
+			move_id = tuple(map(tuple, move))
+
+			if move_id in visited:
+				continue
+
 			child = Node(move, node)
 			node.add_child(child)
 			expanded.append(child)
+			visited.add(move_id)
 
 def solve_with_gbf():
 	pass
