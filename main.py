@@ -5,7 +5,9 @@ from heuristics import manhattan_distance
 from shared import Puzzle, _
 
 def get_possible_moves(puzzle: Puzzle) -> list[Puzzle]:
-	"""Returns a list of all possible states that can be reached from `puzzle` by moving the empty tile."""
+	"""
+	Returns a list of all possible states that can be reached from `puzzle` by moving the empty tile.
+	"""
 
 	empty_row, empty_col = [(r, c) for r in range(3) for c in range(3) if puzzle[r][c] == 0][0]
 	moves = []
@@ -21,6 +23,11 @@ def get_possible_moves(puzzle: Puzzle) -> list[Puzzle]:
 	return moves
 
 def solve_with_dfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
+	"""
+	Tries to find the shortest path to goal by brute forcing all possible paths in a
+	depth-first manner.
+	"""
+
 	expanded = [Node(initial)]
 	visited: set[Puzzle] = set()
 	visited.add(initial)
@@ -41,6 +48,11 @@ def solve_with_dfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 			visited.add(move)
 
 def solve_with_bfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
+	"""
+	Tries to find the shortest path to goal by brute forcing all possible paths in a
+	breadth-first manner.
+	"""
+
 	expanded = deque([Node(initial)])
 	visited: set[Puzzle] = set()
 	visited.add(initial)
@@ -61,6 +73,24 @@ def solve_with_bfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 			visited.add(move)
 
 def solve_with_gbf(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
+	"""
+	Tries to find the shortest path to goal by successively going for the next possible
+	empty space movement that leads to the state closest to goal.
+
+	Given
+		S 1 1 1 5 G
+		2 2 2 2 2 2
+	where
+		S is the start,
+		G is the goal,
+		and there are only 2 paths from S to G: (1, 1, 1, 5) and (2, 2, 2, 2, 2, 2),
+	GBF will mistakenly think that the second path is shorter.
+
+	Why?
+		Because GBF only looks ahead and the second path is full of 2s, it will think the
+		first path is a no go since it contains a 5, and 5 > 2.
+	"""
+
 	expanded = deque([Node(initial)])
 	visited: set[Puzzle] = set()
 	visited.add(initial)
@@ -81,19 +111,55 @@ def solve_with_gbf(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 			expanded.append(child)
 			visited.add(move)
 
-def solve_with_astar():
-	pass
+def solve_with_astar(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
+	"""
+	Tries to find the shortest path to goal by successively going for the next possible
+	empty space movement that leads to the state closest to goal balanced with the least
+	amount of moves already made.
+
+	Given
+		S 1 1 1 5 G
+		2 2 2 2 2 2
+	where
+		S is the start,
+		G is the goal,
+		and there are only 2 paths from S to G: (1, 1, 1, 5) and (2, 2, 2, 2, 2, 2),
+	A* will successfully recognize that the first path is shorter.
+
+	Why?
+		Because A* not only considers the distance remaining to reach the goal, but also the distance already traveled.
+	"""
+
+	expanded = deque([Node(initial)])
+	visited: set[Puzzle] = set()
+	visited.add(initial)
+
+	while len(expanded) > 0:
+		expanded = deque(sorted(expanded, key=lambda node: node.depth() + manhattan_distance(node.value, goal)))
+		node = expanded.popleft()
+
+		if node.value == goal:
+			return node
+
+		for move in get_possible_moves(node.value):
+			if move in visited:
+				continue
+
+			child = Node(move, node)
+			node.add_child(child)
+			expanded.append(child)
+			visited.add(move)
 
 initial = (
 	(_, 2, 3),
-	(1, 4, 5),
-	(8, 7, 6),
+	(4, 5, 7),
+	(8, 1, 6),
 )
 
 goal = (
 	(1, 2, 3),
-	(8, _, 4),
-	(7, 6, 5),
+	(4, 5, 6),
+	(7, 8, _),
 )
 
 # if result := solve_with_dfs(initial, goal):
@@ -104,6 +170,10 @@ goal = (
 # 	print("\nBFS:")
 # 	result.display_lineage()
 
-if result := solve_with_gbf(initial, goal):
-	print("\nGBF:")
+# if result := solve_with_gbf(initial, goal):
+# 	print("\nGBF:")
+# 	result.display_lineage()
+
+if result := solve_with_astar(initial, goal):
+	print("\nA*:")
 	result.display_lineage()
