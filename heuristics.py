@@ -3,7 +3,9 @@ from shared import Puzzle, _
 
 @lru_cache(maxsize=None)
 def _goal_position_of(value: int, goal: Puzzle) -> tuple[int, int]:
-	"""Returns the position (row, col) of `value` in `goal`."""
+	"""
+	Returns the position (row, col) of `value` in `goal`.
+	"""
 
 	for row in range(3):
 		for col in range(3):
@@ -13,7 +15,9 @@ def _goal_position_of(value: int, goal: Puzzle) -> tuple[int, int]:
 	raise ValueError(f"Invalid 8-puzzle value: {value}")
 
 def manhattan_distance(src: Puzzle, dst: Puzzle) -> int:
-	"""Returns how far `src` is from `dst` by counting the number of moves needed to reach `dst` for each tile in `src`."""
+	"""
+	Returns how far `src` is from `dst` by counting the number of moves needed to reach `dst` for each tile in `src`.
+	"""
 
 	distance = 0
 
