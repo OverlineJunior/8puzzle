@@ -1,14 +1,14 @@
 from functools import lru_cache
-from main import Puzzle, _
+from shared import Puzzle, _
 
 @lru_cache(maxsize=None)
 def _goal_position_of(value: int, goal: Puzzle) -> tuple[int, int]:
 	"""Returns the position (row, col) of `value` in `goal`."""
 
-	for i in range(3):
-		for j in range(3):
-			if value == goal:
-				return i, j
+	for row in range(3):
+		for col in range(3):
+			if value == goal[row][col]:
+				return row, col
 
 	raise ValueError(f"Invalid 8-puzzle value: {value}")
 
@@ -17,12 +17,12 @@ def manhattan_distance(src: Puzzle, dst: Puzzle) -> int:
 
 	distance = 0
 
-	for i in range(3):
-		for j in range(3):
-			value = src[i][j]
+	for row in range(3):
+		for col in range(3):
+			value = src[row][col]
 
 			if value != _:
-				gx, gy = _goal_position_of(value, dst)
-				distance += abs(gx - i) + abs(gy - j)
+				g_row, g_col = _goal_position_of(value, dst)
+				distance += abs(g_row - row) + abs(g_col - col)
 
 	return distance
