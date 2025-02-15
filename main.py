@@ -1,6 +1,4 @@
 from collections import deque
-import copy
-from functools import lru_cache
 from typing import Optional
 from graph import Node
 
@@ -15,6 +13,8 @@ type Puzzle = tuple[
 _ = 0
 
 def get_possible_moves(puzzle: Puzzle) -> list[Puzzle]:
+	"""Returns a list of all possible states that can be reached from `puzzle` by moving the empty tile."""
+
 	empty_row, empty_col = [(r, c) for r in range(3) for c in range(3) if puzzle[r][c] == 0][0]
 	moves = []
 
