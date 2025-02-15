@@ -1,16 +1,8 @@
 from collections import deque
 from typing import Optional
 from graph import Node
-
-# We use tuples because they are hashable, thus can be used in a set.
-type Puzzle = tuple[
-	tuple[int, int, int],
-	tuple[int, int, int],
-	tuple[int, int, int],
-]
-
-# Represents an empty tile.
-_ = 0
+from heuristics import manhattan_distance
+from shared import Puzzle, _
 
 def get_possible_moves(puzzle: Puzzle) -> list[Puzzle]:
 	"""Returns a list of all possible states that can be reached from `puzzle` by moving the empty tile."""
@@ -68,8 +60,26 @@ def solve_with_bfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 			expanded.append(child)
 			visited.add(move)
 
-def solve_with_gbf():
-	pass
+def solve_with_gbf(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
+	expanded = deque([Node(initial)])
+	visited: set[Puzzle] = set()
+	visited.add(initial)
+
+	while len(expanded) > 0:
+		expanded = deque(sorted(expanded, key=lambda node: manhattan_distance(node.value, goal)))
+		node = expanded.popleft()
+
+		if node.value == goal:
+			return node
+
+		for move in get_possible_moves(node.value):
+			if move in visited:
+				continue
+
+			child = Node(move, node)
+			node.add_child(child)
+			expanded.append(child)
+			visited.add(move)
 
 def solve_with_astar():
 	pass
@@ -86,10 +96,14 @@ goal = (
 	(7, 6, 5),
 )
 
-if result := solve_with_dfs(initial, goal):
-	print("DFS:")
-	result.display_lineage()
+# if result := solve_with_dfs(initial, goal):
+# 	print("DFS:")
+# 	result.display_lineage()
 
-if result := solve_with_bfs(initial, goal):
-	print("\nBFS:")
+# if result := solve_with_bfs(initial, goal):
+# 	print("\nBFS:")
+# 	result.display_lineage()
+
+if result := solve_with_gbf(initial, goal):
+	print("\nGBF:")
 	result.display_lineage()
