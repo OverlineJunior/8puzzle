@@ -1,7 +1,7 @@
 from collections import deque
 from typing import Optional
 from graph import Node
-from heuristics import manhattan_distance
+from heuristics import Heuristic, manhattan_distance
 from shared import Puzzle, _
 
 def get_possible_moves(puzzle: Puzzle) -> list[Puzzle]:
@@ -72,7 +72,7 @@ def solve_with_bfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 			expanded.append(child)
 			visited.add(move)
 
-def solve_with_gbf(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
+def solve_with_gbf(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Optional[Node[Puzzle]]:
 	"""
 	Tries to find the shortest path to goal by successively going for the next possible
 	empty space movement that leads to the state closest to goal.
@@ -96,7 +96,7 @@ def solve_with_gbf(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 	visited.add(initial)
 
 	while len(expanded) > 0:
-		expanded = deque(sorted(expanded, key=lambda node: manhattan_distance(node.value, goal)))
+		expanded = deque(sorted(expanded, key=lambda node: heuristic(node.value, goal)))
 		node = expanded.popleft()
 
 		if node.value == goal:
@@ -111,7 +111,7 @@ def solve_with_gbf(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 			expanded.append(child)
 			visited.add(move)
 
-def solve_with_astar(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
+def solve_with_astar(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Optional[Node[Puzzle]]:
 	"""
 	Tries to find the shortest path to goal by successively going for the next possible
 	empty space movement that leads to the state closest to goal balanced with the least
@@ -135,7 +135,7 @@ def solve_with_astar(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 	visited.add(initial)
 
 	while len(expanded) > 0:
-		expanded = deque(sorted(expanded, key=lambda node: node.depth() + manhattan_distance(node.value, goal)))
+		expanded = deque(sorted(expanded, key=lambda node: node.depth() + heuristic(node.value, goal)))
 		node = expanded.popleft()
 
 		if node.value == goal:
@@ -170,10 +170,10 @@ goal = (
 # 	print("\nBFS:")
 # 	result.display_lineage()
 
-# if result := solve_with_gbf(initial, goal):
+# if result := solve_with_gbf(initial, goal, manhattan_distance):
 # 	print("\nGBF:")
 # 	result.display_lineage()
 
-if result := solve_with_astar(initial, goal):
+if result := solve_with_astar(initial, goal, manhattan_distance):
 	print("\nA*:")
 	result.display_lineage()

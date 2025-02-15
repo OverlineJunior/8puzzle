@@ -1,5 +1,8 @@
 from functools import lru_cache
+from typing import Callable
 from shared import Puzzle, _
+
+type Heuristic = Callable[[Puzzle, Puzzle], int]
 
 @lru_cache(maxsize=None)
 def _goal_position_of(value: int, goal: Puzzle) -> tuple[int, int]:
