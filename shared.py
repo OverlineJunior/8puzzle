@@ -22,3 +22,6 @@ def get_possible_moves(puzzle: Puzzle) -> list[Puzzle]:
 			moves.append(tuple(tuple(row) for row in move))
 
 	return moves
+
+def pretty_puzzle(puzzle: Puzzle) -> str:
+    return " ".join("X" if n == 0 else str(n) for row in puzzle for n in row)

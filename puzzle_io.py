@@ -1,5 +1,6 @@
 import math
-from shared import Puzzle, _
+from graph import Path, pretty_path
+from shared import Puzzle, _, pretty_puzzle
 
 def square_matrix[T](arr: list[T]) -> list[list[T]]:
 	"""
@@ -35,9 +36,12 @@ def read_puzzle() -> Puzzle:
 		else:
 			raise ValueError(f"Expected `input.txt` to have 9, 16, or 25 tiles, got {len(tiles)}")
 
-def write_search_results():
+def write_search_results(path: Path[Puzzle], visited_count: int):
 	"""
 	Writes the search results to a file in the root directory.
 	"""
 
-	pass
+	with open("results.txt", "w") as file:
+		file.write(f"Nodes visited: {visited_count}\n")
+		file.write("\nPath:\n")
+		file.write(pretty_path(path, pretty_puzzle))

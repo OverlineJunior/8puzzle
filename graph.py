@@ -1,12 +1,15 @@
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Callable, Optional
 
 type Path[T] = list[Node[T]]
 """
 List of nodes, where the first is the root and the last is the leaf.
 """
 
-def pretty_path[T](path: Path[T]) -> str:
+def pretty_path[T](
+		path: Path[T],
+		format: Callable[[T], str] = lambda v: f"{v}"
+) -> str:
 	lines = []
 
 	for n in path:
@@ -16,7 +19,7 @@ def pretty_path[T](path: Path[T]) -> str:
 			else " <-- leaf" if depth == len(path) - 1
 			else ""
 		)
-		lines.append(f"{n.value}, depth: {depth}{postfix}")
+		lines.append(f"{format(n.value)} | depth: {depth}{postfix}")
 
 	return "\n".join(lines)
 
