@@ -80,6 +80,8 @@ def solve_with_gbf(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Optio
 	Tries to find the shortest path to goal by successively going for the next possible
 	empty space movement that leads to the state closest to goal.
 
+	Faster to compute when compared to A*, but does not guarantee the shortest path.
+
 	Given
 		S 1 1 1 5 G
 		2 2 2 2 2 2
@@ -120,6 +122,8 @@ def solve_with_astar(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Opt
 	Tries to find the shortest path to goal by successively going for the next possible
 	empty space movement that leads to the state closest to goal balanced with the least
 	amount of moves already made.
+
+	Slower to compute when compared to GBF, but guarantees the shortest path.
 
 	Given
 		S 1 1 1 5 G
