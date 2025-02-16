@@ -3,6 +3,7 @@ from typing import Optional
 from graph import Node
 from heuristics import Heuristic, manhattan_distance
 from shared import Puzzle, _
+from time import time
 
 def get_possible_moves(puzzle: Puzzle) -> list[Puzzle]:
 	"""
@@ -175,6 +176,12 @@ goal = (
 # 	print("\nGBF:")
 # 	result.display_lineage()
 
+start = time()
+
 if result := solve_with_astar(initial, goal, manhattan_distance):
 	print("\nA*:")
 	result.display_lineage()
+
+end = time()
+
+print(f"\nTime taken: {end - start:.4f}s")
