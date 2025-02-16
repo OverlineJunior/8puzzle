@@ -1,22 +1,24 @@
 from collections import deque
-from collections.abc import Container, Callable
+from collections.abc import Callable
 from typing import Optional
 from graph import Node
 from heuristics import Heuristic
 from shared import Puzzle, _, get_possible_moves
 import heapq
 
-type ContainerFn = Container | Callable[[], Container]
+type Container = list | deque
+
+type ContainerFn = Callable[[], Container]
 """
 Function responsible for setting up the container used to store the expanded nodes.
 """
 
-type InsertFn = Callable[[Container, Node[Puzzle], Puzzle], None]
+type InsertFn[C: Container] = Callable[[C, Node[Puzzle], Puzzle], None]
 """
 Function responsible for inserting a node into the container.
 """
 
-type ExtractFn = Callable[[Container], Node[Puzzle]]
+type ExtractFn[C: Container] = Callable[[C], Node[Puzzle]]
 """
 Function responsible for extracting a node from the container.
 """
@@ -27,18 +29,18 @@ May contain, depending on whether the search succeeded or not, a tuple with
 the node representing the goal state and the number of nodes visited.
 """
 
-def search(
+def search[C: Container](
     initial: Puzzle,
     goal: Puzzle,
-    container: ContainerFn,
-    insert: InsertFn,
-    extract: ExtractFn,
+    container: C,
+    insert: InsertFn[C],
+    extract: ExtractFn[C],
 ) -> SearchResult:
 	"""
 	Generic search algorithm, used as the base for all other search algorithms here.
 	"""
 
-	expanded = container()
+	expanded = container
 	insert(expanded, Node(initial), initial)
 
 	visited: set[Puzzle] = set()
@@ -68,8 +70,8 @@ def search_with_dfs(initial: Puzzle, goal: Puzzle) -> SearchResult:
 	return search(
 		initial,
 		goal,
-		container = list,
-		insert = lambda container, node: container.append(node),
+		container = list[Node[Puzzle]](),
+		insert = lambda container, node, _: container.append(node),
 		extract = lambda container: container.pop()
     )
 
@@ -82,8 +84,8 @@ def search_with_bfs(initial: Puzzle, goal: Puzzle) -> SearchResult:
 	return search(
 		initial,
 		goal,
-		container = deque,
-		insert = lambda container, node: container.appendleft(node),
+		container = deque[Node[Puzzle]](),
+		insert = lambda container, node, _: container.appendleft(node),
 		extract = lambda container: container.pop()
 	)
 
@@ -111,7 +113,7 @@ def search_with_gbf(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Sear
 	return search(
 		initial,
 		goal,
-		container = list,
+		container = list[tuple[int, Node[Puzzle]]](),
 		insert = lambda container, node, state:
       		heapq.heappush(container, (heuristic(state, goal), node)),
 		extract = lambda container: heapq.heappop(container)[1],
@@ -142,7 +144,7 @@ def search_with_astar(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Se
 	return search(
 		initial,
 		goal,
-		container = list,
+		container = list[tuple[int, Node[Puzzle]]](),
 		insert = lambda container, node, state:
       		heapq.heappush(container, (node.depth() + heuristic(state, goal), node)),
 		extract = lambda container: heapq.heappop(container)[1],
