@@ -6,13 +6,34 @@ from heuristics import Heuristic
 from shared import Puzzle, _, get_possible_moves
 import heapq
 
+type ContainerFn = Container | Callable[[], Container]
+"""
+Function responsible for setting up the container used to store the expanded nodes.
+"""
+
+type InsertFn = Callable[[Container, Node[Puzzle], Puzzle], None]
+"""
+Function responsible for inserting a node into the container.
+"""
+
+type ExtractFn = Callable[[Container], Node[Puzzle]]
+"""
+Function responsible for extracting a node from the container.
+"""
+
+type SearchResult = Optional[tuple[Node[Puzzle], int]]
+"""
+May contain, depending on whether the search succeeded or not, a tuple with
+the node representing the goal state and the number of nodes visited.
+"""
+
 def search(
     initial: Puzzle,
     goal: Puzzle,
-    container: Container,
-    insert: Callable[[Container, Node[Puzzle], Puzzle], None],
-    extract: Callable[[Container], Node[Puzzle]],
-) -> Optional[Node[Puzzle]]:
+    container: ContainerFn,
+    insert: InsertFn,
+    extract: ExtractFn,
+) -> SearchResult:
 	"""
 	Generic search algorithm, used as the base for all other search algorithms here.
 	"""
