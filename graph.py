@@ -38,9 +38,6 @@ class Node[T]:
 		child._parent = self
 		self._edges.append(Edge(self, child))
 
-	def children(self) -> list["Node[T]"]:
-		return [edge.dst for edge in self._edges]
-
 	def depth(self) -> int:
 		"""
 		Returns how deep the node is in the tree, starting from 0 since we use
@@ -55,14 +52,6 @@ class Node[T]:
 			node = node._parent
 
 		return d
-
-	def root(self) -> "Node[T]":
-		node = self
-
-		while node._parent:
-			node = node._parent
-
-		return node
 
 	def path(self) -> Path[T]:
 		"""
