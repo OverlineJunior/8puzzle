@@ -8,11 +8,6 @@ import heapq
 
 type Container = list | deque
 
-type ContainerFn = Callable[[], Container]
-"""
-Function responsible for setting up the container used to store the expanded nodes.
-"""
-
 type InsertFn[C: Container] = Callable[[C, Node[Puzzle], Puzzle], None]
 """
 Function responsible for inserting a node into the container.
