@@ -15,29 +15,51 @@ def square_matrix[T](arr: list[T]) -> list[list[T]]:
 	scale = int(math.sqrt(len(arr)))
 	return [arr[i:(i + scale)] for i in range(0, len(arr), scale)]
 
-def read_puzzle() -> Puzzle:
-	"""
-	Reads a `Puzzle` from a file in the root directory.
+def matrix2d_to_tuple2d[T](matrix: list[list[T]]) -> tuple[tuple[T]]:
+	return tuple(tuple(row) for row in matrix)
 
-	Each tile must be represented by a digit or X for the empty tile, all separated by whitespace.
+def parse_puzzle_input() -> tuple[Puzzle, Puzzle]:
+	"""
+	Parses the initial and goal puzzles from the input file.
+
+	Syntax:
+	```python
+	# `X` represents the empty tile.
+	initial: 1 2 3 4 5 6 7 8 X
+	goal: 1 2 3 4 5 6 7 8 X
+	```
 	"""
 
-	def parse(tile: str) -> int:
+	def parse_tile(tile: str) -> int:
 		if tile.isdigit():
 			return int(tile)
 		elif tile == "X":
 			return 0
 		else:
-			raise ValueError(f"Invalid tile `{tile}` in `{INPUT_PATH}`")
+			raise ValueError(f"Invalid puzzle tile `{tile}` in `{INPUT_PATH}`")
 
 	with open(INPUT_PATH) as file:
-		tiles = [parse(tile) for tile in file.read().split()]
-		l = len(tiles)
+		lexemes = file.read().split()
 
-		if l == 9 or l == 16 or l == 25:
-			return tuple(tuple(row) for row in square_matrix(tiles))
+		initial_idx = lexemes.index("initial:")
+		goal_idx = lexemes.index("goal:")
+
+		initial_nums = [parse_tile(l) for l in lexemes[initial_idx + 1:goal_idx]]
+		goal_nums = [parse_tile(l) for l in lexemes[goal_idx + 1:]]
+
+		initial_len = len(initial_nums)
+		goal_len = len(goal_nums)
+
+		if initial_len != goal_len:
+			raise ValueError(f"Expected initial and goal puzzles to have the same number of tiles, got `{initial_len}` and `{goal_len}`")
+
+		if goal_len == 9 or goal_len == 16 or goal_len == 25:
+			return (
+				matrix2d_to_tuple2d(square_matrix(initial_nums)),
+    			matrix2d_to_tuple2d(square_matrix(goal_nums)),
+			)
 		else:
-			raise ValueError(f"Expected `{INPUT_PATH}` to have 9, 16, or 25 tiles, got {len(tiles)}")
+			raise ValueError(f"Expected `{INPUT_PATH}` puzzles to have 9, 16, or 25 tiles, got `{goal_len}`")
 
 def write_search_results(path: Path[Puzzle], visited_count: int):
 	"""

@@ -1,17 +1,10 @@
 from heuristics import manhattan_distance
 from shared import _
 from search_algorithms import search_with_dfs, search_with_bfs, search_with_gbf, search_with_astar, SearchResult
-from puzzle_io import read_puzzle, write_search_results
+from puzzle_io import parse_puzzle_input, write_search_results
 from argparse import ArgumentParser
 
-initial = read_puzzle()
-
-goal = (
-	(1, 2, 3, 4),
-	(5, 6, 7, 8),
-	(9, 10, 11, 12),
-	(13, 14, 15, _),
-)
+initial, goal = parse_puzzle_input()
 
 parser = ArgumentParser()
 parser.add_argument("algorithm", choices=["DFS", "BFS", "GBF", "A*"])
