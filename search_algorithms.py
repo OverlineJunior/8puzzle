@@ -1,7 +1,7 @@
 from collections import deque
 from collections.abc import Callable
 from typing import Optional
-from graph import Node
+from graph import Node, Path
 from heuristics import Heuristic
 from shared import Puzzle, _, get_possible_moves
 import heapq
@@ -23,10 +23,10 @@ type ExtractFn[C: Container] = Callable[[C], Node[Puzzle]]
 Function responsible for extracting a node from the container.
 """
 
-type SearchResult = Optional[tuple[Node[Puzzle], int]]
+type SearchResult = Optional[tuple[Path[Puzzle], int]]
 """
 May contain, depending on whether the search succeeded or not, a tuple with
-the node representing the goal state and the number of nodes visited.
+the path towards the goal state and the number of nodes visited.
 """
 
 def search[C: Container](
@@ -50,7 +50,7 @@ def search[C: Container](
 		node = extract(expanded)
 
 		if node.value == goal:
-			return node, len(visited)
+			return node.path(), len(visited)
 
 		for move in get_possible_moves(node.value):
 			if move in visited:

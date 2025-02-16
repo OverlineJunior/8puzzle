@@ -1,6 +1,25 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
+type Path[T] = list[Node[T]]
+"""
+List of nodes, where the first is the root and the last is the leaf.
+"""
+
+def pretty_path[T](path: Path[T]) -> str:
+	lines = []
+
+	for n in path:
+		depth = n.depth()
+		postfix = (
+			" <-- root" if depth == 0
+			else " <-- leaf" if depth == len(path) - 1
+			else ""
+		)
+		lines.append(f"{n.value}, depth: {depth}{postfix}")
+
+	return "\n".join(lines)
+
 @dataclass
 class Edge:
 	src: "Node"
@@ -42,7 +61,11 @@ class Node[T]:
 
 		return node
 
-	def display_path(self):
+	def path(self) -> Path[T]:
+		"""
+		Returns the path from root to self.
+		"""
+
 		node = self
 		path = []
 
@@ -50,14 +73,8 @@ class Node[T]:
 			path.append(node)
 			node = node._parent
 
-		for n in reversed(path):
-			depth = n.depth()
-			postfix = (
-				" <-- root" if depth == 0
-				else " <-- self" if depth == self.depth()
-				else ""
-			)
-			print(f"{n.value}, depth: {depth}{postfix}")
+		path.reverse()
+		return path
 
 	# `heapq` requires nodes to be comparable, even though the comparison has no effect on the algorithms.
 	def __lt__(self, other: "Node[T]") -> bool:
