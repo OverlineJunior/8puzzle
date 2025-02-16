@@ -171,21 +171,21 @@ goal = (
 
 # if result := solve_with_dfs(initial, goal):
 # 	print("DFS:")
-# 	result.display_lineage()
+# 	result.display_path()
 
 # if result := solve_with_bfs(initial, goal):
 # 	print("\nBFS:")
-# 	result.display_lineage()
+# 	result.display_path()
 
 # if result := solve_with_gbf(initial, goal, manhattan_distance):
 # 	print("\nGBF:")
-# 	result.display_lineage()
+# 	result.display_path()
 
 start = time()
 
 if result := solve_with_astar(initial, goal, manhattan_distance):
 	print("\nA*:")
-	result.display_lineage()
+	result.display_path()
 
 end = time()
 

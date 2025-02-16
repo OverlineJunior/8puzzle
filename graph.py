@@ -42,15 +42,15 @@ class Node[T]:
 
 		return node
 
-	def display_lineage(self):
+	def display_path(self):
 		node = self
-		lineage = []
+		path = []
 
 		while node:
-			lineage.append(node)
+			path.append(node)
 			node = node._parent
 
-		for n in reversed(lineage):
+		for n in reversed(path):
 			depth = n.depth()
 			postfix = (
 				" <-- root" if depth == 0
