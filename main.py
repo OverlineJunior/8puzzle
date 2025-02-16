@@ -1,4 +1,5 @@
 from collections import deque
+from collections.abc import Container
 from typing import Optional
 from graph import Node
 from heuristics import Heuristic, manhattan_distance
@@ -25,18 +26,25 @@ def get_possible_moves(puzzle: Puzzle) -> list[Puzzle]:
 
 	return moves
 
-def solve_with_dfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
+def search(
+    initial: Puzzle,
+    goal: Puzzle,
+    container: Container,
+    insert: callable[[Container, Node[Puzzle], Puzzle], None],
+    extract: callable[[Container], Node[Puzzle]],
+) -> Optional[Node[Puzzle]]:
 	"""
-	Tries to find the shortest path to goal by brute forcing all possible paths in a
-	depth-first manner.
+	Generic search algorithm, used as the base for all other search algorithms here.
 	"""
 
-	expanded = [Node(initial)]
+	expanded = container()
+	insert(expanded, Node(initial), initial)
+
 	visited: set[Puzzle] = set()
 	visited.add(initial)
 
 	while len(expanded) > 0:
-		node = expanded.pop()
+		node = extract(expanded)
 
 		if node.value == goal:
 			return node
@@ -47,8 +55,22 @@ def solve_with_dfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 
 			child = Node(move)
 			node.add_child(child)
-			expanded.append(child)
+			insert(expanded, child, move)
 			visited.add(move)
+
+def solve_with_dfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
+	"""
+	Tries to find the shortest path to goal by brute forcing all possible paths in a
+	depth-first manner.
+	"""
+
+	return search(
+		initial,
+		goal,
+		container = list,
+		insert = lambda container, node: container.append(node),
+		extract = lambda container: container.pop()
+    )
 
 def solve_with_bfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 	"""
@@ -56,24 +78,13 @@ def solve_with_bfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 	breadth-first manner.
 	"""
 
-	expanded = deque([Node(initial)])
-	visited: set[Puzzle] = set()
-	visited.add(initial)
-
-	while len(expanded) > 0:
-		node = expanded.popleft()
-
-		if node.value == goal:
-			return node
-
-		for move in get_possible_moves(node.value):
-			if move in visited:
-				continue
-
-			child = Node(move)
-			node.add_child(child)
-			expanded.append(child)
-			visited.add(move)
+	return search(
+		initial,
+		goal,
+		container = deque,
+		insert = lambda container, node: container.appendleft(node),
+		extract = lambda container: container.pop()
+	)
 
 def solve_with_gbf(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Optional[Node[Puzzle]]:
 	"""
@@ -96,26 +107,14 @@ def solve_with_gbf(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Optio
 		first path is a no go since it contains a 5, and 5 > 2.
 	"""
 
-	expanded: list[(int, Node[Puzzle])] = []
-	heapq.heappush(expanded, (heuristic(initial, goal), Node(initial)))
-
-	visited: set[Puzzle] = set()
-	visited.add(initial)
-
-	while expanded:
-		_, node = heapq.heappop(expanded)
-
-		if node.value == goal:
-			return node
-
-		for move in get_possible_moves(node.value):
-			if move in visited:
-				continue
-
-			child = Node(move)
-			node.add_child(child)
-			heapq.heappush(expanded, (heuristic(move, goal), child))
-			visited.add(move)
+	return search(
+		initial,
+		goal,
+		container = list,
+		insert = lambda container, node, state:
+      		heapq.heappush(container, (heuristic(state, goal), node)),
+		extract = lambda container: heapq.heappop(container)[1],
+	)
 
 def solve_with_astar(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Optional[Node[Puzzle]]:
 	"""
@@ -135,29 +134,18 @@ def solve_with_astar(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Opt
 	A* will successfully recognize that the first path is shorter.
 
 	Why?
-		Because A* not only considers the distance remaining to reach the goal, but also the distance already traveled.
+		Because A* not only considers the distance remaining to reach the goal,
+  		but also the distance already traveled.
 	"""
 
-	expanded: list[(int, Node[Puzzle])] = []
-	heapq.heappush(expanded, (heuristic(initial, goal), Node(initial)))
-
-	visited: set[Puzzle] = set()
-	visited.add(initial)
-
-	while expanded:
-		_, node = heapq.heappop(expanded)
-
-		if node.value == goal:
-			return node
-
-		for move in get_possible_moves(node.value):
-			if move in visited:
-				continue
-
-			child = Node(move)
-			node.add_child(child)
-			heapq.heappush(expanded, (child.depth() + heuristic(move, goal), child))
-			visited.add(move)
+	return search(
+		initial,
+		goal,
+		container = list,
+		insert = lambda container, node, state:
+      		heapq.heappush(container, (node.depth() + heuristic(state, goal), node)),
+		extract = lambda container: heapq.heappop(container)[1],
+	)
 
 initial = (
 	(2, 14, 4, 8),
