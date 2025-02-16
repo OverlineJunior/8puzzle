@@ -1,8 +1,6 @@
 from heuristics import manhattan_distance
 from shared import _
-from time import time
-from search_algorithms import search_with_dfs, search_with_bfs, search_with_gbf, search_with_astar
-from graph import pretty_path
+from search_algorithms import search_with_astar
 from puzzle_io import read_puzzle, write_search_results
 
 initial = read_puzzle()
