@@ -20,6 +20,11 @@ class Node[T]:
 		return [edge.dst for edge in self._edges]
 
 	def depth(self) -> int:
+		"""
+		Returns how deep the node is in the tree, starting from 0 since we use
+		the node's depth to count puzzle moves.
+  		"""
+
 		node = self
 		d = 0
 
