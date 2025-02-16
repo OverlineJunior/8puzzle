@@ -17,21 +17,25 @@ goal = (
 	(13, 14, 15, _),
 )
 
-# if result := search_with_dfs(initial, goal):
+# result = search_with_dfs(initial, goal)
+# if result:
 # 	print("DFS:")
 # 	result.display_path()
 
-# if result := search_with_bfs(initial, goal):
+# result = search_with_bfs(initial, goal)
+# if result:
 # 	print("\nBFS:")
 # 	result.display_path()
 
-# if result := search_with_gbf(initial, goal, manhattan_distance):
+# result = search_with_gbf(initial, goal, manhattan_distance)
+# if result:
 # 	print("\nGBF:")
 # 	result.display_path()
 
 start = time()
 
-if result := search_with_astar(initial, goal, manhattan_distance):
+result, _ = search_with_astar(initial, goal, manhattan_distance)
+if result:
 	print("\nA*:")
 	result.display_path()
 

@@ -48,7 +48,7 @@ def search(
 		node = extract(expanded)
 
 		if node.value == goal:
-			return node
+			return node, len(visited)
 
 		for move in get_possible_moves(node.value):
 			if move in visited:
@@ -59,7 +59,7 @@ def search(
 			insert(expanded, child, move)
 			visited.add(move)
 
-def search_with_dfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
+def search_with_dfs(initial: Puzzle, goal: Puzzle) -> SearchResult:
 	"""
 	Tries to find the shortest path to goal by brute forcing all possible paths in a
 	depth-first manner.
@@ -73,7 +73,7 @@ def search_with_dfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 		extract = lambda container: container.pop()
     )
 
-def search_with_bfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
+def search_with_bfs(initial: Puzzle, goal: Puzzle) -> SearchResult:
 	"""
 	Tries to find the shortest path to goal by brute forcing all possible paths in a
 	breadth-first manner.
@@ -87,7 +87,7 @@ def search_with_bfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 		extract = lambda container: container.pop()
 	)
 
-def search_with_gbf(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Optional[Node[Puzzle]]:
+def search_with_gbf(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> SearchResult:
 	"""
 	Tries to find the shortest path to goal by successively going for the next possible
 	empty space movement that leads to the state closest to goal.
@@ -117,7 +117,7 @@ def search_with_gbf(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Opti
 		extract = lambda container: heapq.heappop(container)[1],
 	)
 
-def search_with_astar(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Optional[Node[Puzzle]]:
+def search_with_astar(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> SearchResult:
 	"""
 	Tries to find the shortest path to goal by successively going for the next possible
 	empty space movement that leads to the state closest to goal balanced with the least
