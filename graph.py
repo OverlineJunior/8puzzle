@@ -9,11 +9,12 @@ class Edge:
 @dataclass
 class Node[T]:
 	value: T
-	parent: Optional["Node"] = None
+	_parent: Optional["Node"] = None
 	_edges: list[Edge] = field(default_factory=list)
 
-	def add_child(self, node: "Node[T]"):
-		self._edges.append(Edge(self, node))
+	def add_child(self, child: "Node[T]"):
+		child._parent = self
+		self._edges.append(Edge(self, child))
 
 	def children(self) -> list["Node[T]"]:
 		return [edge.dst for edge in self._edges]
@@ -22,17 +23,17 @@ class Node[T]:
 		node = self
 		d = 0
 
-		while node.parent:
+		while node._parent:
 			d += 1
-			node = node.parent
+			node = node._parent
 
 		return d
 
 	def root(self) -> "Node[T]":
 		node = self
 
-		while node.parent:
-			node = node.parent
+		while node._parent:
+			node = node._parent
 
 		return node
 
@@ -42,7 +43,7 @@ class Node[T]:
 
 		while node:
 			lineage.append(node)
-			node = node.parent
+			node = node._parent
 
 		for n in reversed(lineage):
 			depth = n.depth()
@@ -52,3 +53,7 @@ class Node[T]:
 				else ""
 			)
 			print(f"{n.value}, depth: {depth}{postfix}")
+
+	# `heapq` requires nodes to be comparable, even though the comparison has no effect on the algorithms.
+	def __lt__(self, other: "Node[T]") -> bool:
+		return False
