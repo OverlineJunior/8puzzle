@@ -4,6 +4,7 @@ from graph import Node
 from heuristics import Heuristic, manhattan_distance
 from shared import Puzzle, _
 from time import time
+import heapq
 
 def get_possible_moves(puzzle: Puzzle) -> list[Puzzle]:
 	"""
@@ -44,7 +45,7 @@ def solve_with_dfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 			if move in visited:
 				continue
 
-			child = Node(move, node)
+			child = Node(move)
 			node.add_child(child)
 			expanded.append(child)
 			visited.add(move)
@@ -69,7 +70,7 @@ def solve_with_bfs(initial: Puzzle, goal: Puzzle) -> Optional[Node[Puzzle]]:
 			if move in visited:
 				continue
 
-			child = Node(move, node)
+			child = Node(move)
 			node.add_child(child)
 			expanded.append(child)
 			visited.add(move)
@@ -93,13 +94,14 @@ def solve_with_gbf(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Optio
 		first path is a no go since it contains a 5, and 5 > 2.
 	"""
 
-	expanded = deque([Node(initial)])
+	expanded: list[(int, Node[Puzzle])] = []
+	heapq.heappush(expanded, (heuristic(initial, goal), Node(initial)))
+
 	visited: set[Puzzle] = set()
 	visited.add(initial)
 
-	while len(expanded) > 0:
-		expanded = deque(sorted(expanded, key=lambda node: heuristic(node.value, goal)))
-		node = expanded.popleft()
+	while expanded:
+		_, node = heapq.heappop(expanded)
 
 		if node.value == goal:
 			return node
@@ -108,9 +110,9 @@ def solve_with_gbf(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Optio
 			if move in visited:
 				continue
 
-			child = Node(move, node)
+			child = Node(move)
 			node.add_child(child)
-			expanded.append(child)
+			heapq.heappush(expanded, (heuristic(move, goal), child))
 			visited.add(move)
 
 def solve_with_astar(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Optional[Node[Puzzle]]:
@@ -132,13 +134,14 @@ def solve_with_astar(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Opt
 		Because A* not only considers the distance remaining to reach the goal, but also the distance already traveled.
 	"""
 
-	expanded = deque([Node(initial)])
+	expanded: list[(int, Node[Puzzle])] = []
+	heapq.heappush(expanded, (heuristic(initial, goal), Node(initial)))
+
 	visited: set[Puzzle] = set()
 	visited.add(initial)
 
-	while len(expanded) > 0:
-		expanded = deque(sorted(expanded, key=lambda node: node.depth() + heuristic(node.value, goal)))
-		node = expanded.popleft()
+	while expanded:
+		_, node = heapq.heappop(expanded)
 
 		if node.value == goal:
 			return node
@@ -147,21 +150,23 @@ def solve_with_astar(initial: Puzzle, goal: Puzzle, heuristic: Heuristic) -> Opt
 			if move in visited:
 				continue
 
-			child = Node(move, node)
+			child = Node(move)
 			node.add_child(child)
-			expanded.append(child)
+			heapq.heappush(expanded, (child.depth() + heuristic(move, goal), child))
 			visited.add(move)
 
 initial = (
-	(_, 2, 3),
-	(4, 5, 7),
-	(8, 1, 6),
+	(2, 14, 4, 8),
+    (1, 7, 3, 12),
+    (5, 9, 6, _),
+    (13, 10, 11, 15),
 )
 
 goal = (
-	(1, 2, 3),
-	(4, 5, 6),
-	(7, 8, _),
+	(1, 2, 3, 4),
+	(5, 6, 7, 8),
+	(9, 10, 11, 12),
+	(13, 14, 15, _),
 )
 
 # if result := solve_with_dfs(initial, goal):
