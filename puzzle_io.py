@@ -16,7 +16,7 @@ def square_matrix[T](arr: list[T]) -> list[list[T]]:
 	return [arr[i:(i + scale)] for i in range(0, len(arr), scale)]
 
 def matrix2d_to_tuple2d[T](matrix: list[list[T]]) -> tuple[tuple[T]]:
-	return tuple(tuple(row) for row in matrix)
+	return tuple(tuple(row) for row in matrix) # type: ignore
 
 def parse_puzzle_input() -> tuple[Puzzle, Puzzle]:
 	"""
@@ -61,12 +61,19 @@ def parse_puzzle_input() -> tuple[Puzzle, Puzzle]:
 		else:
 			raise ValueError(f"Expected `{INPUT_PATH}` puzzles to have 9, 16, or 25 tiles, got `{goal_len}`")
 
-def write_search_results(path: Path[Puzzle], visited_count: int):
+def write_search_results(
+		path: Path[Puzzle],
+		visited_count: int,
+		time_taken: float,
+		peak_memory: int,
+):
 	"""
 	Writes the search results to a file in the root directory.
 	"""
 
 	with open(RESULTS_PATH, "w") as file:
 		file.write(f"Nodes visited: {visited_count}\n")
+		file.write(f"Time taken: {time_taken:.6f} seconds\n")
+		file.write(f"Peak memory usage: {peak_memory} KB\n")
 		file.write("\nPath:\n")
 		file.write(pretty_path(path, pretty_puzzle))

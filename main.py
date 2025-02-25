@@ -1,3 +1,5 @@
+from typing import Callable
+from benchmark import benchmark_time, benchmark_memory
 from heuristics import manhattan_distance
 from shared import _
 from search_algorithms import search_with_dfs, search_with_bfs, search_with_gbf, search_with_astar, SearchResult
@@ -12,16 +14,21 @@ parser.add_argument("algorithm", choices=["DFS", "BFS", "GBF", "A*"])
 if __name__ == "__main__":
 	args = parser.parse_args()
 
-	search_result: SearchResult = None
+	algorithm: Callable
 	match args.algorithm:
 		case "DFS":
-			search_result = search_with_dfs(initial, goal)
+			algorithm = lambda: search_with_dfs(initial, goal)
 		case "BFS":
-			search_result = search_with_bfs(initial, goal)
+			algorithm = lambda: search_with_bfs(initial, goal)
 		case "GBF":
-			search_result = search_with_gbf(initial, goal, manhattan_distance)
+			algorithm = lambda: search_with_gbf(initial, goal, manhattan_distance)
 		case "A*":
-			search_result = search_with_astar(initial, goal, manhattan_distance)
+			algorithm = lambda: search_with_astar(initial, goal, manhattan_distance)
+
+	# We must do everything separatedly, otherwise one benchmark will affect the other.
+	search_result = algorithm()
+	time_taken = benchmark_time(algorithm)
+	peak_memory = benchmark_memory(algorithm)
 
 	if search_result:
-		write_search_results(*search_result)
+		write_search_results(*search_result, time_taken, peak_memory)
